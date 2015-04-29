@@ -11,14 +11,14 @@ def processRange(r1, r2, file_dict, dup_file_dict, files):
         #hash as binary
         h = hash(open(files[i], "rb").read())
         if h in file_dict:
-            print("adding to dup")
+            #print("adding to dup")
             if h in dup_file_dict:
                 dup_file_dict[h].append(files[i])
             else:
                 dup_file_dict[h] = [files[i], file_dict[h]]
         else:
             file_dict[h] = files[i]
-            print("adding to file_dict")
+            #print("adding to file_dict")
 
 #alerts the user to duplicates
 def callOutDups(dup_file_dict):
@@ -54,27 +54,71 @@ def callOutDups(dup_file_dict):
                 print("Invalid input, choose one file (by number) to maintain")
 
 #does the iteration work
-def checkPath(path):
+def checkPath(path, thread_count=1000):
     file_dict = {} 
     dup_file_dict = {}
     file_count = 0
     files = []
+
+    print("Processing files in directory: " + path)
+
     for i in os.listdir(path):
         if os.path.isfile(os.path.join(path,i)):
             file_count+=1
             files.append(os.path.join(path,i))
     print("Files found: " + str(file_count))
 
-    #hardcode 2 threads
-    s1 = int(file_count / 2) - 1
-    s2 = file_count
-    t1 = threading.Thread(target=processRange, args=(0, s1, file_dict, dup_file_dict, files))
-    t2 = threading.Thread(target=processRange, args=(s1, s2, file_dict, dup_file_dict, files))
-    t1.start()
-    t2.start()
+    threads = []
+    f_slice = []
 
-    t1.join()
-    t2.join()
+    #handle if we can do more threads than files
+    if (thread_count > file_count):
+        thread_count = file_count
+
+    #starting per thread
+    per_thread = int(file_count / thread_count)
+    
+    #set all threads
+    for i in range(thread_count):
+        f_slice.append(per_thread)
+
+    #remainder number of files that haven't been distributed to threads
+    extra_files = file_count - (per_thread * thread_count)
+
+    #add remainder to threads as equally as possible
+    for i in f_slice:
+        if extra_files == 0:
+            break
+        i+=1
+        extra_files -= 1
+
+    #starts a thread_count threads
+    #fill threads list with threads that we can start
+    #f_slice is the number of files each thread should hash
+    counter = 0
+    for i in range(len(f_slice)):
+        s1 = counter
+        counter  = counter + f_slice[i]
+        t = threading.Thread(target=processRange, args=(s1, counter, file_dict, dup_file_dict, files))
+        threads.append(t)
+
+    #start all threads
+    for i in threads:
+        i.start()
+    ##hardcode 2 threads
+    #s1 = int(file_count / 2) - 1
+    #s2 = file_count
+    #t1 = threading.Thread(target=processRange, args=(0, s1, file_dict, dup_file_dict, files))
+    #t2 = threading.Thread(target=processRange, args=(s1, s2, file_dict, dup_file_dict, files))
+    #t1.start()
+    #t2.start()
+
+    #t1.join()
+    #t2.join()
+
+    #join all threads
+    for i in threads:
+        i.join()
 
     print("Done Processing Directory\n")
 
