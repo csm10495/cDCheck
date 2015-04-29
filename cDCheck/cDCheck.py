@@ -34,7 +34,7 @@ def callOutDups(dup_file_dict):
             c = input("Choose a number for the file you would like to maintain. (s to skip this file)\n")
             
             #break character
-            if c.lower() == "s":
+            if str(c).lower() == "s":
                 break
             
             try:
@@ -54,7 +54,7 @@ def callOutDups(dup_file_dict):
                 print("Invalid input, choose one file (by number) to maintain")
 
 #does the iteration work
-def checkPath(path, thread_count=1000):
+def checkPath(path, thread_count=4):
     file_dict = {} 
     dup_file_dict = {}
     file_count = 0
@@ -105,16 +105,6 @@ def checkPath(path, thread_count=1000):
     #start all threads
     for i in threads:
         i.start()
-    ##hardcode 2 threads
-    #s1 = int(file_count / 2) - 1
-    #s2 = file_count
-    #t1 = threading.Thread(target=processRange, args=(0, s1, file_dict, dup_file_dict, files))
-    #t2 = threading.Thread(target=processRange, args=(s1, s2, file_dict, dup_file_dict, files))
-    #t1.start()
-    #t2.start()
-
-    #t1.join()
-    #t2.join()
 
     #join all threads
     for i in threads:
@@ -127,19 +117,26 @@ def checkPath(path, thread_count=1000):
 #entrant function
 def main():
     #make sure we have enough args
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         print("Please do not remove files from the given directory while this is running")
 
         path = sys.argv[1]
 
         #make sure path exists
         if os.path.exists(path):
-            checkPath(path)
+            if (len(sys.argv) == 3):
+                try:
+                    t = int(sys.argv[2])
+                    checkPath(path, t)
+                except ValueError:
+                    print("Number of threads is not an integer, please make it one and try again")
+            if (len(sys.argv) == 2):
+                checkPath(path)
         else:
             print("Given path does not exist, please check and try again")
 
     else:
-        print("Usage: python cDCheck.py folderpath")
+        print("Usage: python cDCheck.py folderpath <number of threads, defaults to 4>")
 
 if __name__ == '__main__':
     main()
