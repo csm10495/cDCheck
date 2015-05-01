@@ -4,6 +4,7 @@
 import os        #for directory access
 import sys       #for args
 import threading #for threading
+import re        #for regex matching
 
 #processes the files in range
 def processRange(r1, r2, file_dict, dup_file_dict, files):
@@ -31,15 +32,28 @@ def callOutDups(dup_file_dict):
         
         #keep going to valid input
         while True:
-            c = input("Choose a number for the file you would like to maintain. Other options are:\ns to skip this file\nr to delete all files that DON'T match a regex\n")
+            c = input("Choose a number for the file you would like to maintain. Other options are:\ns to skip this file\nr to delete all files that DON'T contain a regex match\n")
             
             #break character
             if str(c).lower() == "s":
                 break
             
-            #break character
+            #regex character
             if str(c).lower() == "r":
-                print("Regex not implemented yet.")
+                r = input("Regex: ")
+                try:
+                    reg = re.compile(str(r))
+                except Exception:
+                    print("Unable to compile regex. Please try again.")
+                    continue
+
+                for z in range(0, j + 1):
+                    #delete all that don't match regex
+                    if not reg.search(dup_file_dict[i][z]):
+                        os.remove(dup_file_dict[i][z])
+
+                print("Deleted files that didn't match regex: " + str(r))
+                break
 
             try:
                 c = int(c)
