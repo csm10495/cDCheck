@@ -31,12 +31,16 @@ def callOutDups(dup_file_dict):
         
         #keep going to valid input
         while True:
-            c = input("Choose a number for the file you would like to maintain. (s to skip this file)\n")
+            c = input("Choose a number for the file you would like to maintain. Other options are:\ns to skip this file\nr to delete all files that DON'T match a regex\n")
             
             #break character
             if str(c).lower() == "s":
                 break
             
+            #break character
+            if str(c).lower() == "r":
+                print("Regex not implemented yet.")
+
             try:
                 c = int(c)
             except ValueError:
@@ -86,10 +90,10 @@ def checkPath(path, thread_count=4):
     extra_files = file_count - (per_thread * thread_count)
 
     #add remainder to threads as equally as possible
-    for i in f_slice:
+    for i in range(len(f_slice)):
         if extra_files == 0:
             break
-        i+=1
+        f_slice[i]+=1
         extra_files -= 1
 
     #starts a thread_count threads
