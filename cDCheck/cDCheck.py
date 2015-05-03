@@ -80,10 +80,13 @@ def checkPath(path, thread_count=4):
 
     print("Processing files in directory: " + path)
 
-    for i in os.listdir(path):
-        if os.path.isfile(os.path.join(path,i)):
+    ldir = os.listdir(path)
+
+    for i in ldir:
+        f_path = os.path.join(path, i)
+        if os.path.isfile(f_path):
             file_count+=1
-            files.append(os.path.join(path,i))
+            files.append(f_path)
     print("Files found: " + str(file_count))
 
     threads = []
@@ -129,7 +132,7 @@ def checkPath(path, thread_count=4):
         i.join()
 
     print("Done Processing Directory\n")
-
+    print("Found " + str(len(dup_file_dict)) + " files with duplicates")
     callOutDups(dup_file_dict)
 
 #entrant function
@@ -146,15 +149,20 @@ def main():
                 try:
                     t = int(sys.argv[2])
                     checkPath(path, t)
+                    print("cDCheck Completed Successfully!")
                 except ValueError:
                     print("Number of threads is not an integer, please make it one and try again")
             if (len(sys.argv) == 2):
                 checkPath(path)
+                print("cDCheck Completed Successfully!")
         else:
             print("Given path does not exist, please check and try again")
 
     else:
         print("Usage: python cDCheck.py folderpath <number of threads, defaults to 4>")
+
+
+
 
 if __name__ == '__main__':
     main()
